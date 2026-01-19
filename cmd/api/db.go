@@ -15,7 +15,7 @@ var DB *pgxpool.Pool
 func InitDB() {
 	dsn := getEnv(
 		"DATABASE_URL",
-		"postgres://auth:1234@localhost:5432/authdb?sslmode=disable",
+		"postgres://postgres:1234@localhost:5432/authdb?sslmode=disable",
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -31,6 +31,9 @@ func InitDB() {
 	}
 
 	DB = pool
+	var dbname, schema, sp string
+	_ = DB.QueryRow(context.Background(), "select current_database(), current_schema(), current_setting('search_path')").Scan(&dbname, &schema, &sp)
+	log.Println("DB:", dbname, "schema:", schema, "search_path:", sp)
 	log.Println("✅ DB connected")
 }
 
